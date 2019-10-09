@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,12 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import com.example.first.R;
+import com.example.first.Todo;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 class CustomAdapter extends BaseAdapter {
 
@@ -22,8 +29,10 @@ class CustomAdapter extends BaseAdapter {
     private TreeSet<Integer> sectionHeader = new TreeSet<Integer>();
 
     private LayoutInflater mInflater;
+    Context baseContext;
 
     public CustomAdapter(Context context) {
+        this.baseContext = context;
         mInflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -34,20 +43,33 @@ class CustomAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public void turnState(final String text) {
+    public void turnState(String text) {
         for (int i = 0; i < mData.size(); i++) {
 
-            if (mData.get(i).text == text)
-                turnState(i);
+            if (mData.get(i).text == text) {
+                JsonObject json = new JsonObject();
+                json.addProperty("todo_id", mData.get(i).id);
+                if (!mData.get(i).isCompleted)
+                    json.addProperty("isCompleted", "true");
+                else
+                    json.addProperty("isCompleted", "false");
+
+                Ion.with(baseContext)
+                        .load(baseContext.getString(R.string.UpdateRequest))
+                        .setJsonObjectBody(json)
+                        .asJsonObject()
+                        .setCallback(new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                            }
+                        });
+
+                setState(i, !(mData.get(i).isCompleted));
+            }
         }
+
     }
 
-    public void turnState(final int position) {
-        if (mData.get(position).isCompleted == true)
-            setState(position, false);
-        else
-            setState(position, true);
-    }
 
     public void setState(final int position, boolean state) {
         mData.get(position).isCompleted = state;
@@ -55,7 +77,7 @@ class CustomAdapter extends BaseAdapter {
     }
 
     public void addSectionHeaderItem(final String text) {
-        Todo sectionItem = new Todo(text, false, "section_item");
+        Todo sectionItem = new Todo(text, false, "section_item", "section_item");
         mData.add(sectionItem);
         sectionHeader.add(mData.size() - 1);
         notifyDataSetChanged();
@@ -111,26 +133,38 @@ class CustomAdapter extends BaseAdapter {
         }
 
         holder.textView.setText(mData.get(position).text);
+
+        Paint paint = new Paint();
+        paint.setStrikeThruText(mData.get(position).isCompleted);
+        holder.textView.setPaintFlags(paint.getFlags());
+
         if (rowType == 0) {
             holder.textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     TextView tv = (TextView) (view);
-                    turnState(tv.getText().toString());
 
+                    Paint paint = new Paint();
+                    paint.setStrikeThruText(mData.get(position).isCompleted);
+                    tv.setPaintFlags(paint.getFlags());
+
+                    turnState(tv.getText().toString());
                 }
             });
 
             holder.checkBox.setChecked(mData.get(position).isCompleted);
-/*
-        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            holder.checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    TextView tv = (TextView) (view);
 
-                Todo totoInFocus = (Todo) buttonView.getTag();
-                if (totoInFocus.isCompleted == isChecked) return;
+                    Paint paint = new Paint();
+                    paint.setStrikeThruText(mData.get(position).isCompleted);
+                    tv.setPaintFlags(paint.getFlags());
 
-            }
-        });*/
+                    turnState(tv.getText().toString());
+                }
+            });
         }
         return convertView;
     }

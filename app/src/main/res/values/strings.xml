@@ -4,6 +4,6 @@
     <string name="title_activity_add_todo">AddTodo</string>
     <string name="apiGetProjects">"https://dyrdin-oblako-group.herokuapp.com/api/projects"</string>
     <string name="apiGetTodos">"https://dyrdin-oblako-group.herokuapp.com/api/todos"</string>
-    <string name="UpdateRequest">http://localhost:3000/project/update</string>
-    <string name="CreateRequest">http://localhost:3000/project/create</string>
+    <string name="UpdateRequest">https://dyrdin-oblako-group.herokuapp.com/projects/update</string>
+    <string name="CreateRequest">https://dyrdin-oblako-group.herokuapp.com/projects/create</string>
 </resources>
