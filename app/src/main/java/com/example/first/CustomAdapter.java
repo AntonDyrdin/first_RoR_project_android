@@ -25,7 +25,7 @@ class CustomAdapter extends BaseAdapter {
     private static final int TYPE_ITEM = 0;
     private static final int TYPE_SEPARATOR = 1;
 
-    private ArrayList<Todo> mData = new ArrayList<Todo>();
+    public ArrayList<Todo> mData = new ArrayList<Todo>();
     private TreeSet<Integer> sectionHeader = new TreeSet<Integer>();
 
     private LayoutInflater mInflater;
@@ -107,7 +107,6 @@ class CustomAdapter extends BaseAdapter {
         holder.textView.setPaintFlags(paint.getFlags());
 
         if (rowType == 0) {
-
 
             holder.textView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -2,6 +2,7 @@ package com.example.first;
 
 import android.content.Context;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -35,6 +36,10 @@ import io.github.inflationx.viewpump.ViewPump;
 import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 
 public class AddTodo extends AppCompatActivity {
+
+    static public final int NEW_TODO = 1;
+    static public final int NOTHING = 0;
+
     public List<Project> projects;
     int currentPosition;
     String selectedProject = "";
@@ -101,14 +106,14 @@ public class AddTodo extends AppCompatActivity {
 
                 if (currentPosition != position) {
 
-                    ImageView icon= projectList.getChildAt(currentPosition).findViewById(R.id.selected_project_icon);
+                    ImageView icon = projectList.getChildAt(currentPosition).findViewById(R.id.selected_project_icon);
                     icon.setVisibility(View.INVISIBLE);
 
-                    icon= view.findViewById(R.id.selected_project_icon);
+                    icon = view.findViewById(R.id.selected_project_icon);
                     icon.setVisibility(View.VISIBLE);
 
-                   TextView selectedTextView=  ((TextView) ((LinearLayout) view).getChildAt(0));
-                  selectedTextView.setBackgroundColor(Color.TRANSPARENT);
+                    TextView selectedTextView = ((TextView) ((LinearLayout) view).getChildAt(0));
+                    selectedTextView.setBackgroundColor(Color.TRANSPARENT);
 
                     selectedProject = selectedTextView.getText().toString();
 
@@ -140,12 +145,18 @@ public class AddTodo extends AppCompatActivity {
 
                             @Override
                             public void onCompleted(Exception e, JsonObject result) {
-                                getParent().recreate();
+
                             }
                         });
+                setResult(NEW_TODO, new Intent());
+                finish();
+                return super.onOptionsItemSelected(item);
             }
         }
-        finish();
+        if(item.getItemId() == android.R.id.home)
+        {   setResult(NOTHING, new Intent());
+            finish();
+        }
         return super.onOptionsItemSelected(item);
     }
 

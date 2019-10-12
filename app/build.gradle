@@ -37,4 +37,5 @@ dependencies {
     implementation 'io.github.inflationx:viewpump:2.0.3'
 
     implementation 'com.koushikdutta.ion:ion:3.0.8'
+    implementation 'androidx.mediarouter:mediarouter:1.1.0'
 }

@@ -27,6 +27,7 @@ import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 
 import android.view.View.OnClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,38 @@ public class MainActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.list);
 
+        dounloadDataAndSetupView();
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (projects_strings != null) {
+                    Intent intent = new Intent(MainActivity.this, AddTodo.class);
+
+                    Bundle b = new Bundle();
+                    b.putStringArray("projects_strings", projects_strings);
+                    intent.putExtras(b);
+
+
+                    startActivityForResult(intent, 0);
+                    TextView todoText_view = findViewById(R.id.todoText);
+
+
+                }
+            }
+        });
+
+    }
+
+    void dounloadDataAndSetupView() {
+
+        if (mAdapter != null) {
+            mAdapter.mData.clear();
+            mAdapter.notifyDataSetChanged();
+            projects = null;
+            todos = null;
+        }
         mAdapter = new CustomAdapter(this);
 
 
@@ -119,26 +152,22 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (projects_strings != null) {
-                    Intent intent = new Intent(MainActivity.this, AddTodo.class);
-
-                    Bundle b = new Bundle();
-                    b.putStringArray("projects_strings", projects_strings);
-                    intent.putExtras(b);
-
-                    startActivity(intent);
-                }
+        if (requestCode == 0) {
+            if (resultCode == AddTodo.NEW_TODO) {
+                dounloadDataAndSetupView();
             }
-        });
+        }
     }
 
     public void showAllTodos() {
+        mAdapter.mData.clear();
+        mAdapter.notifyDataSetChanged();
         if (projects != null & todos != null) {
 
             for (int i = 0; i < projects.size(); i++) {
