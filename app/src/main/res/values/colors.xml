@@ -10,5 +10,5 @@
     <color name="backgroundColor">#F8F8F8</color>
     <color name="placeholderColor">#AAB0BC</color>
     <color name="pinkSearch">#EF2C96</color>
-    <color name="systemShadow">#663E464F</color>
+    <color name="systemShadow">#3E464F</color>
 </resources>

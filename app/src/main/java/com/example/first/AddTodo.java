@@ -1,8 +1,8 @@
 package com.example.first;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.google.gson.Gson;
@@ -15,10 +15,13 @@ import com.koushikdutta.ion.Ion;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,77 +54,26 @@ public class AddTodo extends AppCompatActivity {
 
 
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_add_todo);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Новая задача");
         setSupportActionBar(toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Button okButton = findViewById(R.id.ok);
-        okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (selectedProject != "") {
-                    JsonObject json = new JsonObject();
-                    json.addProperty("text", todoText.getText().toString());
-                    json.addProperty("project", selectedProject);
-
-                    Ion.with(getBaseContext())
-                            .load(getString(R.string.CreateRequest))
-                            .setJsonObjectBody(json)
-                            .asJsonObject()
-                            .setCallback(new FutureCallback<JsonObject>() {
-                                @Override
-                                public void onCompleted(Exception e, JsonObject result) {
-                                }
-                            });
-                }
-                finish();
-            }
-        });
-
-        Button cancelButton = findViewById(R.id.cancel);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
 
         projectList = findViewById(R.id.projectList);
         currentPosition = 0;
         mAdapter = new CustomAdapter(this);
 
-        Ion.with(this)
+        Bundle b = this.getIntent().getExtras();
+        String[] projects_strings = b.getStringArray("projects_strings");
 
-                .load(getString(R.string.apiGetProjects))
+        for (int i = 0; i < projects_strings.length; i++) {
+            mAdapter.addSectionHeaderItem(projects_strings[i]);
+        }
 
-                .asJsonArray()
-
-                .setCallback(new FutureCallback<JsonArray>() {
-
-                    @Override
-
-                    public void onCompleted(Exception e, JsonArray result) {
-
-                        if (result != null) {
-
-                            projects = new ArrayList<Project>();
-
-                            for (final JsonElement projectJsonElement : result) {
-
-                                projects.add(new Gson().fromJson(projectJsonElement, Project.class));
-
-                            }
-                            for (int i = 0; i < projects.size(); i++) {
-                                mAdapter.addSectionHeaderItem(projects.get(i).title);
-                            }
-
-                            projectList.setAdapter(mAdapter);
-                        }
-                    }
-                });
+        projectList.setAdapter(mAdapter);
 
         todoText = findViewById(R.id.todoText);
 
@@ -133,10 +85,10 @@ public class AddTodo extends AppCompatActivity {
 
                     String text = todoText.getText().toString();
 
-                    if (text.equals("Текст задачи..."))
+                    if (text.equals("Название задачи..."))
                         todoText.setText("");
                     else if (text.equals(""))
-                        todoText.setText("Текст задачи...");
+                        todoText.setText("Название задачи...");
                 }
             }
         });
@@ -149,15 +101,52 @@ public class AddTodo extends AppCompatActivity {
 
                 if (currentPosition != position) {
 
-                    projectList.getChildAt(currentPosition).setBackgroundColor(getResources().getColor(R.color.backgroundColor));
-                    view.setBackgroundColor(getResources().getColor(R.color.accentColor));
+                    ImageView icon= projectList.getChildAt(currentPosition).findViewById(R.id.selected_project_icon);
+                    icon.setVisibility(View.INVISIBLE);
 
-                    selectedProject = ((TextView) ((LinearLayout) view).getChildAt(0)).getText().toString();
+                    icon= view.findViewById(R.id.selected_project_icon);
+                    icon.setVisibility(View.VISIBLE);
+
+                   TextView selectedTextView=  ((TextView) ((LinearLayout) view).getChildAt(0));
+                  selectedTextView.setBackgroundColor(Color.TRANSPARENT);
+
+                    selectedProject = selectedTextView.getText().toString();
 
                     currentPosition = position;
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.add_todo_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.add) {
+            if (!selectedProject.equals("") & !todoText.getText().toString().equals("Название задачи...")) {
+                JsonObject json = new JsonObject();
+                json.addProperty("text", todoText.getText().toString());
+                json.addProperty("project", selectedProject);
+
+                Ion.with(getBaseContext())
+                        .load(getString(R.string.CreateRequest))
+                        .setJsonObjectBody(json)
+                        .asJsonObject()
+                        .setCallback(new FutureCallback<JsonObject>() {
+
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                getParent().recreate();
+                            }
+                        });
+            }
+        }
+        finish();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

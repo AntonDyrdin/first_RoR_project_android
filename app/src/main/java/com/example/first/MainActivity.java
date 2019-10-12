@@ -13,6 +13,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.view.Menu;
@@ -32,10 +33,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private CustomAdapter mAdapter;
+    public CustomAdapter mAdapter;
     private ListView listView;
     public List<Project> projects;
     public List<Todo> todos;
+    String[] projects_strings;
+
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -51,10 +54,14 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolbar_main_activity);
+        setSupportActionBar(toolbar);
+
 
         listView = findViewById(R.id.list);
 
         mAdapter = new CustomAdapter(this);
+
 
         Ion.with(this)
 
@@ -77,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
                                 projects.add(new Gson().fromJson(projectJsonElement, Project.class));
 
                             }
+                            projects_strings = new String[projects.size()];
+
+                            for (int i = 0; i < projects.size(); i++)
+                                projects_strings[i] = projects.get(i).title;
                             showAllTodos();
                         }
                     }
@@ -103,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                                 todos.add(new Gson().fromJson(todoJsonElement, Todo.class));
 
                             }
+
                             showAllTodos();
                         }
                     }
@@ -113,9 +125,15 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (projects_strings != null) {
+                    Intent intent = new Intent(MainActivity.this, AddTodo.class);
 
-                Intent intent = new Intent(MainActivity.this, AddTodo.class);
-                startActivity(intent);
+                    Bundle b = new Bundle();
+                    b.putStringArray("projects_strings", projects_strings);
+                    intent.putExtras(b);
+
+                    startActivity(intent);
+                }
             }
         });
     }

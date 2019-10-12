@@ -38,43 +38,10 @@ class CustomAdapter extends BaseAdapter {
     }
 
     public void addItem(Todo todo) {
-
         mData.add(todo);
         notifyDataSetChanged();
     }
 
-    public void turnState(String text) {
-        for (int i = 0; i < mData.size(); i++) {
-
-            if (mData.get(i).text == text) {
-                JsonObject json = new JsonObject();
-                json.addProperty("todo_id", mData.get(i).id);
-                if (!mData.get(i).isCompleted)
-                    json.addProperty("isCompleted", "true");
-                else
-                    json.addProperty("isCompleted", "false");
-
-                Ion.with(baseContext)
-                        .load(baseContext.getString(R.string.UpdateRequest))
-                        .setJsonObjectBody(json)
-                        .asJsonObject()
-                        .setCallback(new FutureCallback<JsonObject>() {
-                            @Override
-                            public void onCompleted(Exception e, JsonObject result) {
-                            }
-                        });
-
-                setState(i, !(mData.get(i).isCompleted));
-            }
-        }
-
-    }
-
-
-    public void setState(final int position, boolean state) {
-        mData.get(position).isCompleted = state;
-        notifyDataSetChanged();
-    }
 
     public void addSectionHeaderItem(final String text) {
         Todo sectionItem = new Todo(text, false, "section_item", "section_item");
@@ -125,6 +92,7 @@ class CustomAdapter extends BaseAdapter {
                 case TYPE_SEPARATOR:
                     convertView = mInflater.inflate(R.layout.snippet_item2, null);
                     holder.textView = (TextView) convertView.findViewById(R.id.textSeparator);
+
                     break;
             }
             convertView.setTag(holder);
@@ -139,16 +107,14 @@ class CustomAdapter extends BaseAdapter {
         holder.textView.setPaintFlags(paint.getFlags());
 
         if (rowType == 0) {
+
+
             holder.textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    TextView tv = (TextView) (view);
 
-                    Paint paint = new Paint();
-                    paint.setStrikeThruText(mData.get(position).isCompleted);
-                    tv.setPaintFlags(paint.getFlags());
+                    turnState(position, view);
 
-                    turnState(tv.getText().toString());
                 }
             });
 
@@ -156,17 +122,44 @@ class CustomAdapter extends BaseAdapter {
             holder.checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    TextView tv = (TextView) (view);
 
-                    Paint paint = new Paint();
-                    paint.setStrikeThruText(mData.get(position).isCompleted);
-                    tv.setPaintFlags(paint.getFlags());
+                    turnState(position, view);
 
-                    turnState(tv.getText().toString());
                 }
             });
+        } else {
+            paint.setStrikeThruText(false);
+            paint.setFakeBoldText(true);
+            holder.textView.setPaintFlags(paint.getFlags());
         }
         return convertView;
+    }
+
+    public void turnState(int position, View view) {
+        mData.get(position).isCompleted = !mData.get(position).isCompleted;
+
+        TextView tv = (TextView) (view);
+        Paint paint = new Paint();
+        paint.setStrikeThruText(mData.get(position).isCompleted);
+        tv.setPaintFlags(paint.getFlags());
+        notifyDataSetChanged();
+
+        JsonObject json = new JsonObject();
+        json.addProperty("todo_id", mData.get(position).id);
+        if (mData.get(position).isCompleted)
+            json.addProperty("isCompleted", "true");
+        else
+            json.addProperty("isCompleted", "false");
+
+        Ion.with(baseContext)
+                .load(baseContext.getString(R.string.UpdateRequest))
+                .setJsonObjectBody(json)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                    }
+                });
     }
 
     public static class ViewHolder {
